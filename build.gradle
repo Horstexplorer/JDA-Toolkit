@@ -1,0 +1,95 @@
+plugins {
+    id 'java'
+    id 'maven-publish'
+    id 'com.github.johnrengelman.shadow' version '7.0.0'
+}
+
+group 'de.netbeacon.tools'
+version '0.0.1-SNAPSHOT'
+
+compileJava {
+    options.compilerArgs << '-parameters' // required for commands to work properly
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        name 'hypercdn-maven2'
+        url 'https://nexus.hypercdn.de/repository/hypercdn-maven'
+    }
+    maven {
+        name 'm2-dv8tion'
+        url 'https://m2.dv8tion.net/releases'
+    }
+}
+
+dependencies {
+    // JDA
+    implementation group: 'net.dv8tion', name: 'JDA', version: '4.3.0_309'
+    // LOGGING
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.31'
+    // OKHTTP
+    implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.9.1'
+    // CRYPT
+    implementation group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.66'
+    implementation group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: '1.66'
+    implementation group: 'org.mindrot', name: 'jbcrypt', version: '0.4'
+    // CONCURRENCY
+    implementation group: 'de.netbeacon.utils', name: 'Concurrency-Utils', version: '1.0.9', changing: true
+    // CLASSGRAPH
+    implementation group: 'io.github.classgraph', name: 'classgraph', version: '4.8.115'
+    // APACHE
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
+    // JSON
+    implementation group: 'org.json', name: 'json', version: '20210307'
+}
+
+configurations.all {
+    resolutionStrategy.cacheDynamicVersionsFor 10, 'minutes'
+    resolutionStrategy.cacheChangingModulesFor 1, 'minutes'
+}
+
+shadowJar {
+    archiveClassifier.set("")
+}
+
+publishing {
+    repositories {
+        maven {
+            credentials {
+                username System.getenv('nexus_hypercdn_user')
+                password System.getenv('nexus_hypercdn_password')
+            }
+            url "https://nexus.hypercdn.de/repository/hypercdn-maven/"
+        }
+    }
+    publications {
+        maven(MavenPublication) {
+            artifact(tasks["shadowJar"])
+            pom {
+                name = 'JDA-Toolkit'
+                description = 'Toolkit to make working with JDA even more convenient'
+                url = 'https://github.com/Horstexplorer/JDA-Toolkit'
+
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'horstexplorer'
+                        name = 'horstexplorer'
+                        email = 'null@null.null'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/Horstexplorer/JDA-Toolkit'
+                    developerConnection = 'scm:git:ssh:git@github.com:Horstexplorer/JDA-Toolkit'
+                    url = 'https://github.com/Horstexplorer/JDA-Toolkit'
+                }
+            }
+        }
+    }
+}
