@@ -1,12 +1,12 @@
 package de.netbeacon.tools.jda.internal.command.arg.parsers;
 
 import de.netbeacon.tools.jda.api.annotations.Discoverable;
-import de.netbeacon.tools.jda.api.command.arg.Parsable;
+import de.netbeacon.tools.jda.api.command.arg.Parser;
 
 import java.nio.ByteBuffer;
 
 @Discoverable
-public class DoubleParser implements Parsable<Double> {
+public class DoubleParser implements Parser<Double> {
 
     @Override
     public Class<Double> type() {

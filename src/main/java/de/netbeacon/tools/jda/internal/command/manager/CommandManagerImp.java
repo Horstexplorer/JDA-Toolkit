@@ -1,7 +1,7 @@
 package de.netbeacon.tools.jda.internal.command.manager;
 
 import de.netbeacon.tools.jda.api.annotations.Command;
-import de.netbeacon.tools.jda.api.command.arg.Parsable;
+import de.netbeacon.tools.jda.api.command.arg.Parser;
 import de.netbeacon.tools.jda.api.command.manager.CommandManager;
 import de.netbeacon.tools.jda.api.event.listener.EventListenerPriority;
 import de.netbeacon.tools.jda.api.language.manager.LanguageManager;
@@ -33,7 +33,7 @@ public class CommandManagerImp extends ListenerAdapter implements CommandManager
     private Function<GenericEvent, String> prefixProvider;
     private boolean slashUpdate = false;
     private final List<Function<GenericEvent, DataMap>> externalDataSuppliers = new ArrayList<>();
-    private final Map<Class<?>, Parsable<?>> parsers = new HashMap<>();
+    private final Map<Class<?>, Parser<?>> parsers = new HashMap<>();
     private final Executor executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2);
 
     private final List<CommandContainer> commands = new ArrayList<>();
@@ -89,8 +89,8 @@ public class CommandManagerImp extends ListenerAdapter implements CommandManager
     }
 
     @Override
-    public CommandManager addParsers(List<Parsable<?>> parsables) {
-        for(var parser : parsables){
+    public CommandManager addParsers(List<Parser<?>> parsers) {
+        for(var parser : parsers){
             this.parsers.put(parser.type(), parser);
         }
         return this;

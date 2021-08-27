@@ -9,12 +9,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public record Accessor(Long... accessors){
+public record Accessors(Long... accessors){
 
-    public static final Accessor ANY = new Accessor((Long) null);
+    public static final Accessors ANY = new Accessors((Long) null);
 
-    public static Accessor ANY_OF(Long... accessors){
-        return new Accessor(accessors);
+    public static Accessors ANY_OF(Long... accessors){
+        return new Accessors(accessors);
     }
 
     public Set<Long> asSet(){

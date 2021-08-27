@@ -1,7 +1,6 @@
 package de.netbeacon.tools.jda.internal.command.utils;
 
-import de.netbeacon.tools.jda.api.command.arg.Parsable;
-import de.netbeacon.tools.jda.internal.command.container.ArgumentContainer;
+import de.netbeacon.tools.jda.api.command.arg.Parser;
 import de.netbeacon.tools.jda.internal.command.container.CommandContainer;
 import de.netbeacon.tools.jda.internal.command.container.DataMap;
 import de.netbeacon.tools.jda.internal.exception.ArgumentException;
@@ -16,7 +15,7 @@ public class ArgUtil {
 
     private ArgUtil(){}
 
-    public static Object[] map(CommandContainer commandContainer, DataMap additionalDataMap, Map<Class<?>, Parsable<?>> parsers, List<?> args){
+    public static Object[] map(CommandContainer commandContainer, DataMap additionalDataMap, Map<Class<?>, Parser<?>> parsers, List<?> args){
         var argumentContainers = commandContainer.getArguments();
         var mappedArgs = new Object[argumentContainers.size()];
         var argPos = 0;

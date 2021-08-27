@@ -1,12 +1,12 @@
 package de.netbeacon.tools.jda.internal.command.arg.parsers;
 
 import de.netbeacon.tools.jda.api.annotations.Discoverable;
-import de.netbeacon.tools.jda.api.command.arg.Parsable;
+import de.netbeacon.tools.jda.api.command.arg.Parser;
 
 import java.nio.ByteBuffer;
 
 @Discoverable
-public class FloatParser implements Parsable<Float> {
+public class FloatParser implements Parser<Float> {
 
     @Override
     public Class<Float> type() {

@@ -11,16 +11,47 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * Represents an extended event manager
+ */
 public interface EventManager extends IEventManager {
 
+    /**
+     * Suspends the input to the buffer.
+     *
+     * Activating will reject events from getting added to the buffer and therefore from further processing.
+     * @param state true if suspended
+     */
     void suspendBuffer(boolean state);
 
+    /**
+     * Whether the buffer input is suspended
+     *
+     * @return boolean
+     */
     boolean bufferIsSuspended();
 
+    /**
+     * Suspends the event handling from the buffer
+     *
+     * Activating will stop further processing of events leading for them to pile up in the buffer
+     * @param state true if suspended
+     */
     void suspendHandle(boolean state);
 
+    /**
+     * Whether the event handling from the buffer is suspended
+     *
+     * @return boolean
+     */
     boolean handleIsSuspended();
 
+    /**
+     * Runs the discovery for all EventListeners which have been marked as @Discoverable
+     *
+     * Will create and return a new instance of each one of them where this is possible to do so
+     * @return List of found event listeners
+     */
     static List<EventListener> discover(){
         try(var result = new ClassGraph().enableAllInfo().scan()){
             return result.getAllClasses().stream()

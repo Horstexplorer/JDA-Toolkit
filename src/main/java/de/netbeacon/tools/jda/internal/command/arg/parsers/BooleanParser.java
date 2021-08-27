@@ -1,10 +1,10 @@
 package de.netbeacon.tools.jda.internal.command.arg.parsers;
 
 import de.netbeacon.tools.jda.api.annotations.Discoverable;
-import de.netbeacon.tools.jda.api.command.arg.Parsable;
+import de.netbeacon.tools.jda.api.command.arg.Parser;
 
 @Discoverable
-public class BooleanParser implements Parsable<Boolean> {
+public class BooleanParser implements Parser<Boolean> {
 
     @Override
     public Class<Boolean> type() {

@@ -2,7 +2,7 @@ package de.netbeacon.tools.jda.internal.interactions.type;
 
 import de.netbeacon.tools.jda.api.interactions.manager.ComponentRegistry;
 import de.netbeacon.tools.jda.api.interactions.type.ComponentEntry;
-import de.netbeacon.tools.jda.internal.interactions.records.Accessor;
+import de.netbeacon.tools.jda.internal.interactions.records.Accessors;
 import de.netbeacon.tools.jda.internal.interactions.records.Activations;
 import de.netbeacon.tools.jda.internal.interactions.records.DeactivationMode;
 import de.netbeacon.tools.jda.internal.interactions.records.TimeoutPolicy;
@@ -16,7 +16,7 @@ import java.util.function.Consumer;
 public class ComponentEntryImp<T extends ComponentInteraction> implements ComponentEntry<T> {
 
     private final String id = IDGenerator.printableString(100);
-    private final Accessor accessor;
+    private final Accessors accessors;
     private final Activations activations;
     private final DeactivationMode deactivationMode;
     private final TimeoutPolicy timeoutPolicy;
@@ -27,8 +27,8 @@ public class ComponentEntryImp<T extends ComponentInteraction> implements Compon
     private final Consumer<Exception> exceptionConsumer;
 
 
-    public ComponentEntryImp(Accessor accessor, Activations activations, DeactivationMode deactivationMode, TimeoutPolicy timeoutPolicy, Consumer<T> successConsumer, Consumer<Exception> exceptionConsumer){
-        this.accessor = accessor;
+    public ComponentEntryImp(Accessors accessors, Activations activations, DeactivationMode deactivationMode, TimeoutPolicy timeoutPolicy, Consumer<T> successConsumer, Consumer<Exception> exceptionConsumer){
+        this.accessors = accessors;
         this.activations = activations;
         this.deactivationMode = deactivationMode;
         this.timeoutPolicy = timeoutPolicy;
@@ -43,8 +43,8 @@ public class ComponentEntryImp<T extends ComponentInteraction> implements Compon
     }
 
     @Override
-    public Accessor getAccessor() {
-        return accessor;
+    public Accessors getAccessor() {
+        return accessors;
     }
 
     @Override

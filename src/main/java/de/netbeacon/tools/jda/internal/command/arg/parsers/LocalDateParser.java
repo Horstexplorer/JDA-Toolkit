@@ -1,13 +1,13 @@
 package de.netbeacon.tools.jda.internal.command.arg.parsers;
 
 import de.netbeacon.tools.jda.api.annotations.Discoverable;
-import de.netbeacon.tools.jda.api.command.arg.Parsable;
+import de.netbeacon.tools.jda.api.command.arg.Parser;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 @Discoverable
-public class LocalDateParser implements Parsable<LocalDate> {
+public class LocalDateParser implements Parser<LocalDate> {
     @Override
     public Class<LocalDate> type() {
         return LocalDate.class;

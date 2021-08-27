@@ -25,9 +25,9 @@ repositories {
 
 dependencies {
     // JDA
-    implementation group: 'net.dv8tion', name: 'JDA', version: '4.3.0_309'
+    compileOnly group: 'net.dv8tion', name: 'JDA', version: '4.3.0_310'
     // LOGGING
-    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.31'
+    compileOnly group: 'org.slf4j', name: 'slf4j-api', version: '1.7.31'
     // OKHTTP
     implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.9.1'
     // CRYPT
