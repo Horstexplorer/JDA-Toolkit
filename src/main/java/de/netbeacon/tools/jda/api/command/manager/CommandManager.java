@@ -3,7 +3,6 @@ package de.netbeacon.tools.jda.api.command.manager;
 import de.netbeacon.tools.jda.api.annotations.Command;
 import de.netbeacon.tools.jda.api.annotations.Discoverable;
 import de.netbeacon.tools.jda.api.command.arg.Parser;
-import de.netbeacon.tools.jda.api.language.packag.LanguagePackage;
 import de.netbeacon.tools.jda.internal.command.container.CommandContainer;
 import de.netbeacon.tools.jda.internal.command.container.DataMap;
 import io.github.classgraph.ClassGraph;
@@ -21,23 +20,6 @@ import java.util.stream.Collectors;
  * Represents the manager for the command system
  */
 public interface CommandManager {
-
-    /**
-     * Set the language manager used for within commands
-     *
-     * Exposed as parameter: LanguagePackage languagePackage
-     * @param languagePackageProvider function to provide a language package based on the supplied event
-     * @return current instance of the CommandManager, useful for chaining
-     */
-    CommandManager setLanguagePackageProvider(Function<? super GenericEvent, LanguagePackage> languagePackageProvider);
-
-    /**
-     * Sets the provider function for event based prefixes
-     *
-     * @param prefixProvider function to provide a prefix based on the data provided by the supplied event
-     * @return current instance of the CommandManager, useful for chaining
-     */
-    CommandManager setPrefixProvider(Function<? super GenericEvent, String> prefixProvider);
 
     /**
      * Adds a function to supply external data to commands

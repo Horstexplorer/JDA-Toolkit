@@ -32,8 +32,8 @@ import java.util.regex.Pattern;
 public class CommandManagerImp extends ListenerAdapter implements CommandManager, EventListenerPriority {
 
     private final int priority;
-    private Function<? super GenericEvent, LanguagePackage> languagePackageProvider = (unused) -> null;
-    private Function<? super GenericEvent, String> prefixProvider = (unused) -> "";
+    private final Function<? super GenericEvent, LanguagePackage> languagePackageProvider;
+    private final Function<? super GenericEvent, String> prefixProvider;
     private final List<Function<? super GenericEvent, DataMap>> externalDataSuppliers = new ArrayList<>();
     private final Map<Class<?>, Parser<?>> parsers = new HashMap<>();
     private final Executor executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2);
@@ -42,28 +42,19 @@ public class CommandManagerImp extends ListenerAdapter implements CommandManager
     private final HashMap<String, CommandContainer> slashCommandQuickAccess = new HashMap<>();
     private final HashMap<String, CommandContainer> chatCommandQuickAccess = new HashMap<>();
 
-    private static final Pattern SPACE_PATTERN = Pattern.compile("\s+");
     private static final Pattern ARG_PATTERN = Pattern.compile("(\"(\\X*?)\")|([^\\s]\\X*?(?=\\s|\"|$))");
 
 
-    public CommandManagerImp(){
+    public CommandManagerImp(Function<? super GenericEvent, LanguagePackage> languagePackageProvider, Function<? super GenericEvent, String> prefixProvider){
         this.priority = 0;
-    }
-
-    public CommandManagerImp(int priority){
-        this.priority = priority;
-    }
-
-    @Override
-    public CommandManager setLanguagePackageProvider(Function<? super GenericEvent, LanguagePackage> languagePackageProvider) {
         this.languagePackageProvider = languagePackageProvider;
-        return this;
+        this.prefixProvider = prefixProvider;
     }
 
-    @Override
-    public CommandManager setPrefixProvider(Function<? super GenericEvent, String> prefixProvider) {
+    public CommandManagerImp(int priority, Function<? super GenericEvent, LanguagePackage> languagePackageProvider, Function<? super GenericEvent, String> prefixProvider){
+        this.priority = priority;
+        this.languagePackageProvider = languagePackageProvider;
         this.prefixProvider = prefixProvider;
-        return this;
     }
 
     @Override
