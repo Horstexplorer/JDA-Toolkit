@@ -2,6 +2,7 @@ package de.netbeacon.tools.jda.internal.command.arg.parsers;
 
 import de.netbeacon.tools.jda.api.annotations.Discoverable;
 import de.netbeacon.tools.jda.api.command.arg.Parser;
+import de.netbeacon.tools.jda.internal.exception.ParserException;
 
 import java.nio.ByteBuffer;
 
@@ -15,11 +16,19 @@ public class IntegerParser implements Parser<Integer> {
 
     @Override
     public Integer parse(String data) {
-        return Integer.parseInt(data);
+        try {
+            return Integer.parseInt(data);
+        }catch (Exception e){
+            throw new ParserException("Failed to parse data as "+type().getName(), e);
+        }
     }
 
     @Override
     public Integer parse(byte[] data) {
-        return ByteBuffer.allocate(Integer.BYTES).put(data).flip().getInt();
+        try {
+            return ByteBuffer.allocate(Integer.BYTES).put(data).flip().getInt();
+        }catch (Exception e){
+            throw new ParserException("Failed to parse data as "+type().getName(), e);
+        }
     }
 }

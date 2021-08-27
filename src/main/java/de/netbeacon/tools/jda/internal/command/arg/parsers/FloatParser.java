@@ -2,6 +2,7 @@ package de.netbeacon.tools.jda.internal.command.arg.parsers;
 
 import de.netbeacon.tools.jda.api.annotations.Discoverable;
 import de.netbeacon.tools.jda.api.command.arg.Parser;
+import de.netbeacon.tools.jda.internal.exception.ParserException;
 
 import java.nio.ByteBuffer;
 
@@ -15,11 +16,19 @@ public class FloatParser implements Parser<Float> {
 
     @Override
     public Float parse(String data) {
-        return Float.parseFloat(data);
+        try {
+            return Float.parseFloat(data);
+        }catch (Exception e){
+            throw new ParserException("Failed to parse data as "+type().getName(), e);
+        }
     }
 
     @Override
     public Float parse(byte[] data) {
-        return ByteBuffer.allocate(Float.BYTES).put(data).flip().getFloat();
+        try {
+            return ByteBuffer.allocate(Float.BYTES).put(data).flip().getFloat();
+        }catch (Exception e){
+            throw new ParserException("Failed to parse data as "+type().getName(), e);
+        }
     }
 }

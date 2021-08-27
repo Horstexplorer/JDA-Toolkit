@@ -17,6 +17,10 @@ public class StringParser implements Parser<String> {
 
     @Override
     public String parse(byte[] data) throws ParserException {
-        return new String(data);
+        try {
+            return new String(data);
+        }catch (Exception e){
+            throw new ParserException("Failed to parse data as "+type().getName(), e);
+        }
     }
 }
