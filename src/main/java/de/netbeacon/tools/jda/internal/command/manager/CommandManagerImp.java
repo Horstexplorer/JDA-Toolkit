@@ -4,21 +4,25 @@ import de.netbeacon.tools.jda.api.annotations.Command;
 import de.netbeacon.tools.jda.api.command.arg.Parser;
 import de.netbeacon.tools.jda.api.command.manager.CommandManager;
 import de.netbeacon.tools.jda.api.event.listener.EventListenerPriority;
-import de.netbeacon.tools.jda.api.language.manager.LanguageManager;
+import de.netbeacon.tools.jda.api.language.packag.LanguagePackage;
 import de.netbeacon.tools.jda.internal.command.container.CommandContainer;
 import de.netbeacon.tools.jda.internal.command.container.DataMap;
 import de.netbeacon.tools.jda.internal.command.utils.CommandManagerHelper;
-import de.netbeacon.tools.jda.internal.exception.*;
+import de.netbeacon.tools.jda.internal.exception.ArgumentException;
+import de.netbeacon.tools.jda.internal.exception.ParameterException;
+import de.netbeacon.tools.jda.internal.exception.PermissionException;
+import de.netbeacon.tools.jda.internal.exception.UnsuitableEnvironmentException;
 import de.netbeacon.utils.concurrency.action.imp.SupplierExecutionAction;
 import net.dv8tion.jda.api.events.GenericEvent;
-import net.dv8tion.jda.api.events.ReadyEvent;
-import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
@@ -28,9 +32,9 @@ import java.util.regex.Pattern;
 public class CommandManagerImp extends ListenerAdapter implements CommandManager, EventListenerPriority {
 
     private final int priority;
-    private LanguageManager languageManager;
-    private Function<GenericEvent, String> prefixProvider;
-    private final List<Function<GenericEvent, DataMap>> externalDataSuppliers = new ArrayList<>();
+    private Function<? super GenericEvent, LanguagePackage> languagePackageProvider = (unused) -> null;
+    private Function<? super GenericEvent, String> prefixProvider = (unused) -> "";
+    private final List<Function<? super GenericEvent, DataMap>> externalDataSuppliers = new ArrayList<>();
     private final Map<Class<?>, Parser<?>> parsers = new HashMap<>();
     private final Executor executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2);
 
@@ -51,19 +55,19 @@ public class CommandManagerImp extends ListenerAdapter implements CommandManager
     }
 
     @Override
-    public CommandManager setLanguageProvider(LanguageManager languageManager) {
-        this.languageManager = languageManager;
+    public CommandManager setLanguagePackageProvider(Function<? super GenericEvent, LanguagePackage> languagePackageProvider) {
+        this.languagePackageProvider = languagePackageProvider;
         return this;
     }
 
     @Override
-    public CommandManager setPrefixProvider(Function<GenericEvent, String> prefixProvider) {
+    public CommandManager setPrefixProvider(Function<? super GenericEvent, String> prefixProvider) {
         this.prefixProvider = prefixProvider;
         return this;
     }
 
     @Override
-    public CommandManager addExternalDataSupplier(Function<GenericEvent, DataMap> externalDataSupplier) {
+    public CommandManager addExternalDataSupplier(Function<? super GenericEvent, DataMap> externalDataSupplier) {
         this.externalDataSuppliers.add(externalDataSupplier);
         return this;
     }
@@ -108,14 +112,17 @@ public class CommandManagerImp extends ListenerAdapter implements CommandManager
     @Override
     public void onSlashCommand(@NotNull SlashCommandEvent event) {
         try {
+            // get language package
+            var languagePackage = languagePackageProvider.apply(event);
+            // get command
             var raw = event.getCommandPath().replace("/", " ");
             String longestMatch = "";
-            for(String path : chatCommandQuickAccess.keySet()){
+            for(String path : slashCommandQuickAccess.keySet()){
                 if(raw.startsWith(path) && path.length() > longestMatch.length()){
                     longestMatch = path;
                 }
             }
-            var commandContainer = chatCommandQuickAccess.get(longestMatch);
+            var commandContainer = slashCommandQuickAccess.get(longestMatch);
             if(commandContainer == null){
                 return;
             }
@@ -149,7 +156,7 @@ public class CommandManagerImp extends ListenerAdapter implements CommandManager
                     .add("textChannel", event.getTextChannel())
                     .add("privateChannel", event.getPrivateChannel())
                     .add("jda", event.getJDA())
-                    .add("languageManager", languageManager)
+                    .add("languagePackage", languagePackage)
                     .add("options", event.getOptions())
                     .add("hook", event.getId())
                     .add("interaction", event.getInteraction());
@@ -186,6 +193,8 @@ public class CommandManagerImp extends ListenerAdapter implements CommandManager
             if(event.getAuthor().isBot() || event.getAuthor().isSystem() || event.isWebhookMessage()){
                 return;
             }
+            // get language package
+            var languagePackage = languagePackageProvider.apply(event);
             // is command?
             var raw = event.getMessage().getContentRaw();
             var prefix = prefixProvider.apply(event);
@@ -246,7 +255,7 @@ public class CommandManagerImp extends ListenerAdapter implements CommandManager
                     .add("textChannel", event.getTextChannel())
                     .add("privateChannel", event.isFromGuild() ? null : event.getPrivateChannel())
                     .add("jda", event.getJDA())
-                    .add("languageManager", languageManager)
+                    .add("languagePackage", languagePackage)
                     .add("args", args);
             Supplier<DataMap> externalDataTask = () -> {
                 DataMap extDataMap = new DataMap();

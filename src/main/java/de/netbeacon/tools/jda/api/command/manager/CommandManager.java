@@ -3,14 +3,17 @@ package de.netbeacon.tools.jda.api.command.manager;
 import de.netbeacon.tools.jda.api.annotations.Command;
 import de.netbeacon.tools.jda.api.annotations.Discoverable;
 import de.netbeacon.tools.jda.api.command.arg.Parser;
-import de.netbeacon.tools.jda.api.language.manager.LanguageManager;
+import de.netbeacon.tools.jda.api.language.packag.LanguagePackage;
 import de.netbeacon.tools.jda.internal.command.container.CommandContainer;
 import de.netbeacon.tools.jda.internal.command.container.DataMap;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
 import net.dv8tion.jda.api.events.GenericEvent;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -22,11 +25,11 @@ public interface CommandManager {
     /**
      * Set the language manager used for within commands
      *
-     * Exposed as parameter: LanguageManager languageManager
-     * @param languageManager used within commands
+     * Exposed as parameter: LanguagePackage languagePackage
+     * @param languagePackageProvider function to provide a language package based on the supplied event
      * @return current instance of the CommandManager, useful for chaining
      */
-    CommandManager setLanguageProvider(LanguageManager languageManager);
+    CommandManager setLanguagePackageProvider(Function<? super GenericEvent, LanguagePackage> languagePackageProvider);
 
     /**
      * Sets the provider function for event based prefixes
@@ -34,7 +37,7 @@ public interface CommandManager {
      * @param prefixProvider function to provide a prefix based on the data provided by the supplied event
      * @return current instance of the CommandManager, useful for chaining
      */
-    CommandManager setPrefixProvider(Function<GenericEvent, String> prefixProvider);
+    CommandManager setPrefixProvider(Function<? super GenericEvent, String> prefixProvider);
 
     /**
      * Adds a function to supply external data to commands
@@ -43,7 +46,7 @@ public interface CommandManager {
      * @param externalDataSupplier function to provide external data
      * @return current instance of the CommandManager, useful for chaining
      */
-    CommandManager addExternalDataSupplier(Function<GenericEvent, DataMap> externalDataSupplier);
+    CommandManager addExternalDataSupplier(Function<? super GenericEvent, DataMap> externalDataSupplier);
 
     /**
      * Overload of {@link CommandManager#registerCommands(List)}
