@@ -11,9 +11,9 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import java.lang.reflect.Member;
 import java.util.*;
 
-public class ArgUtil {
+public class CommandManagerHelper {
 
-    private ArgUtil(){}
+    private CommandManagerHelper(){}
 
     public static Object[] map(CommandContainer commandContainer, DataMap additionalDataMap, Map<Class<?>, Parser<?>> parsers, List<?> args){
         var argumentContainers = commandContainer.getArguments();

@@ -7,7 +7,7 @@ import de.netbeacon.tools.jda.api.event.listener.EventListenerPriority;
 import de.netbeacon.tools.jda.api.language.manager.LanguageManager;
 import de.netbeacon.tools.jda.internal.command.container.CommandContainer;
 import de.netbeacon.tools.jda.internal.command.container.DataMap;
-import de.netbeacon.tools.jda.internal.command.utils.ArgUtil;
+import de.netbeacon.tools.jda.internal.command.utils.CommandManagerHelper;
 import de.netbeacon.tools.jda.internal.exception.*;
 import de.netbeacon.utils.concurrency.action.imp.SupplierExecutionAction;
 import net.dv8tion.jda.api.events.GenericEvent;
@@ -23,7 +23,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class CommandManagerImp extends ListenerAdapter implements CommandManager, EventListenerPriority {
@@ -31,13 +30,13 @@ public class CommandManagerImp extends ListenerAdapter implements CommandManager
     private final int priority;
     private LanguageManager languageManager;
     private Function<GenericEvent, String> prefixProvider;
-    private boolean slashUpdate = false;
     private final List<Function<GenericEvent, DataMap>> externalDataSuppliers = new ArrayList<>();
     private final Map<Class<?>, Parser<?>> parsers = new HashMap<>();
     private final Executor executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2);
 
     private final List<CommandContainer> commands = new ArrayList<>();
-    private final HashMap<String, CommandContainer> commandQuickAccess = new HashMap<>();
+    private final HashMap<String, CommandContainer> slashCommandQuickAccess = new HashMap<>();
+    private final HashMap<String, CommandContainer> chatCommandQuickAccess = new HashMap<>();
 
     private static final Pattern SPACE_PATTERN = Pattern.compile("\s+");
     private static final Pattern ARG_PATTERN = Pattern.compile("(\"(\\X*?)\")|([^\\s]\\X*?(?=\\s|\"|$))");
@@ -70,19 +69,21 @@ public class CommandManagerImp extends ListenerAdapter implements CommandManager
     }
 
     @Override
-    public CommandManager performSlashUpdateOnStartup(boolean state) {
-        this.slashUpdate = state;
-        return this;
-    }
-
-    @Override
     public CommandManager registerCommands(List<CommandContainer> commandContainers) {
         commands.addAll(commandContainers);
         for(var container : commandContainers){
             var cmd = container.getAnnotation();
-            commandQuickAccess.put(cmd.path(), container);
-            for(var alias : cmd.alias()){
-                commandQuickAccess.put(alias, container);
+            if(cmd.type().equals(Command.Type.SLASH) || cmd.type().equals(Command.Type.CHAT_AND_SLASH)){
+                slashCommandQuickAccess.put(cmd.path(), container);
+                for(var alias : cmd.alias()){
+                    slashCommandQuickAccess.put(alias, container);
+                }
+            }
+            if(cmd.type().equals(Command.Type.CHAT) || cmd.type().equals(Command.Type.CHAT_AND_SLASH)){
+                chatCommandQuickAccess.put(cmd.path(), container);
+                for(var alias : cmd.alias()){
+                    chatCommandQuickAccess.put(alias, container);
+                }
             }
         }
         return this;
@@ -104,52 +105,21 @@ public class CommandManagerImp extends ListenerAdapter implements CommandManager
 
     // EVENTS
 
-
-    @Override
-    public void onReady(@NotNull ReadyEvent event) {
-
-    }
-
-    @Override
-    public void onGuildReady(@NotNull GuildReadyEvent event) {
-
-    }
-
     @Override
     public void onSlashCommand(@NotNull SlashCommandEvent event) {
         try {
-            List<String> commandPath = new ArrayList<>();
-            commandPath.add(event.getName());
-            if(event.getSubcommandGroup() != null){
-                commandPath.add(event.getSubcommandGroup());
-            }
-            if(event.getSubcommandName() != null){
-                commandPath.add(event.getSubcommandName());
-            }
-            // find command
-            Object cPos = commandQuickAccess;
-            for(var arg : commandPath){
-                if(cPos instanceof Map){
-                    if(((HashMap<?, ?>) cPos).containsKey(arg)){
-                        cPos = ((HashMap<?, ?>) cPos).get(arg);
-                    }else{
-                        cPos = null;
-                        break;
-                    }
-                }else if(cPos instanceof CommandContainer){
-                    break;
+            var raw = event.getCommandPath().replace("/", " ");
+            String longestMatch = "";
+            for(String path : chatCommandQuickAccess.keySet()){
+                if(raw.startsWith(path) && path.length() > longestMatch.length()){
+                    longestMatch = path;
                 }
             }
-            if(cPos == null){
+            var commandContainer = chatCommandQuickAccess.get(longestMatch);
+            if(commandContainer == null){
                 return;
             }
-            var commandContainer = (CommandContainer) cPos;
             var commandAnnotation = commandContainer.getAnnotation();
-            if(commandAnnotation.type().equals(Command.Type.CHAT)
-                    || commandAnnotation.origin().equals(Command.AccessOrigin.DM) && event.isFromGuild()
-                    || commandAnnotation.origin().equals(Command.AccessOrigin.GUILD) && !event.isFromGuild()){
-                return;
-            }
             // check permissions
             if(event.isFromGuild() && !event.getTextChannel().isNSFW() && commandAnnotation.isNSFW()){
                 throw new UnsuitableEnvironmentException(UnsuitableEnvironmentException.Type.NSFW,
@@ -192,7 +162,7 @@ public class CommandManagerImp extends ListenerAdapter implements CommandManager
             new SupplierExecutionAction<>(executor, externalDataTask).queue(externalMap ->{
                 var completeDataMap = DataMap.combine(internalDataMap, externalMap);
                 try {
-                    commandContainer.getMethod().invoke(commandContainer.getInstance(), ArgUtil.map(commandContainer, completeDataMap, parsers, event.getOptions()));
+                    commandContainer.getMethod().invoke(commandContainer.getInstance(), CommandManagerHelper.map(commandContainer, completeDataMap, parsers, event.getOptions()));
                 } catch (ParameterException e){
                     // bad params
                 } catch (ArgumentException e){
@@ -201,10 +171,8 @@ public class CommandManagerImp extends ListenerAdapter implements CommandManager
                     // unhandled
                 }
             }, exception -> {
-
+                // external data
             });
-            // parse
-            // run
         }catch (UnsuitableEnvironmentException e){
             // channel not suitable
         }catch (PermissionException e){
@@ -227,27 +195,25 @@ public class CommandManagerImp extends ListenerAdapter implements CommandManager
             raw = raw.substring(prefix.length());
             // find command
             String longestMatch = "";
-            for(String path : commandQuickAccess.keySet()){
+            for(String path : chatCommandQuickAccess.keySet()){
                 if(raw.startsWith(path) && path.length() > longestMatch.length()){
                     longestMatch = path;
                 }
             }
-            CommandContainer commandContainer = commandQuickAccess.get(longestMatch);
+            var commandContainer = chatCommandQuickAccess.get(longestMatch);
             if(commandContainer == null){
                 return;
             }
             raw = raw.substring(longestMatch.length());
             // parse args
-            List<String> args = new ArrayList<>();
-            Matcher matcher = ARG_PATTERN.matcher(raw);
+            var args = new ArrayList<String>();
+            var matcher = ARG_PATTERN.matcher(raw);
             while(matcher.find()){
                 args.add((matcher.group(2) != null) ? matcher.group(2) : matcher.group());
             }
 
-
             var commandAnnotation = commandContainer.getAnnotation();
-            if(commandAnnotation.type().equals(Command.Type.SLASH)
-                    || commandAnnotation.origin().equals(Command.AccessOrigin.DM) && event.isFromGuild()
+            if(commandAnnotation.origin().equals(Command.AccessOrigin.DM) && event.isFromGuild()
                     || commandAnnotation.origin().equals(Command.AccessOrigin.GUILD) && !event.isFromGuild()){
                 return;
             }
@@ -280,7 +246,8 @@ public class CommandManagerImp extends ListenerAdapter implements CommandManager
                     .add("textChannel", event.getTextChannel())
                     .add("privateChannel", event.isFromGuild() ? null : event.getPrivateChannel())
                     .add("jda", event.getJDA())
-                    .add("languageManager", languageManager);
+                    .add("languageManager", languageManager)
+                    .add("args", args);
             Supplier<DataMap> externalDataTask = () -> {
                 DataMap extDataMap = new DataMap();
                 for(var supplier : externalDataSuppliers)
@@ -290,26 +257,22 @@ public class CommandManagerImp extends ListenerAdapter implements CommandManager
             new SupplierExecutionAction<>(executor, externalDataTask).queue(externalMap ->{
                 var completeDataMap = DataMap.combine(internalDataMap, externalMap);
                 try {
-                    commandContainer.getMethod().invoke(commandContainer.getInstance(), ArgUtil.map(commandContainer, completeDataMap, parsers, args));
+                    commandContainer.getMethod().invoke(commandContainer.getInstance(), CommandManagerHelper.map(commandContainer, completeDataMap, parsers, args));
                 } catch (ParameterException e){
-                    e.printStackTrace();
                     // bad params
                 } catch (ArgumentException e){
-                    e.printStackTrace();
                     // bad args
                 }catch (Exception e) {
-                    e.printStackTrace();
                     // unhandled
                 }
             }, exception -> {
-                exception.printStackTrace();
+                // external data
             });
             // parse
             // run
         }catch (UnsuitableEnvironmentException e){
             // channel not suitable
         }catch (PermissionException e){
-            System.out.println(e.getPermissionCheck());
             // missing bot or user perms
         }
     }
