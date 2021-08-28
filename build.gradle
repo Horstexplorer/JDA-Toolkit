@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'de.netbeacon.tools'
-version '0.0.1-SNAPSHOT'
+version '0.0.1_'+System.getenv("build_number")
 
 compileJava {
     options.compilerArgs << '-parameters' // required for commands to work properly
@@ -57,8 +57,8 @@ publishing {
     repositories {
         maven {
             credentials {
-                username System.getenv('nexus_hypercdn_user')
-                password System.getenv('nexus_hypercdn_password')
+                username findProperty("nexusu") as String
+                password findProperty("nexusp") as String
             }
             url "https://nexus.hypercdn.de/repository/hypercdn-maven/"
         }
