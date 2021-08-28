@@ -46,7 +46,7 @@ public class HumanTime {
         else if(DATE_TIME_PATTERN.matcher(string).matches()){
             return new HumanTime(LocalDateTime.parse(string, DTF));
         }
-        return null;
+        throw new RuntimeException("Failed to parse human time from string");
     }
 
     public LocalDateTime getFutureTime(){

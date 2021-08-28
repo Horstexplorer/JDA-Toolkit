@@ -6,10 +6,14 @@ import de.netbeacon.tools.jda.api.event.listener.EventListenerPriority;
 import de.netbeacon.tools.jda.api.language.packag.LanguagePackage;
 import de.netbeacon.tools.jda.internal.command.container.CommandImp;
 import de.netbeacon.tools.jda.internal.command.container.DataMap;
+import de.netbeacon.tools.jda.internal.command.utils.CommandHelper;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -144,5 +148,34 @@ public class CommandManagerImp extends ListenerAdapter implements CommandManager
         command.doExecute(this, args, event);
     }
 
+    public List<CommandData> getSlashCommandData(){
+        var commandDataList = new ArrayList<CommandData>();
+        for(var entry : slashCommands.entrySet()){
+            var command = entry.getValue();
+            var commandData = new CommandData(command.getName(), command.isExecutable() ? command.getAnnotation().descriptionOverride() : "")
+                    .addOptions(CommandHelper.getOptions(command));
+            for(var subEntry : command.getSubCommands().entrySet()){
+                var subCommand = subEntry.getValue();
+                if(!subCommand.getSubCommands().isEmpty()){
+                    var subCommandGroupData = new SubcommandGroupData(subCommand.getName(), subCommand.isExecutable() ? subCommand.getAnnotation().descriptionOverride() : "");
+                    for(var subSubEntry : subCommand.getSubCommands().entrySet()){
+                        var subSubCommand = subSubEntry.getValue();
+                        subCommandGroupData.addSubcommands(
+                                new SubcommandData(subSubCommand.getName(), subSubCommand.isExecutable() ? subSubCommand.getAnnotation().descriptionOverride() : "")
+                                        .addOptions(CommandHelper.getOptions(subSubCommand))
+                        );
+                    }
+                    commandData.addSubcommandGroups(subCommandGroupData);
+                }else {
+                    commandData.addSubcommands(
+                            new SubcommandData(subCommand.getName(), subCommand.isExecutable() ? subCommand.getAnnotation().descriptionOverride() : "")
+                                    .addOptions(CommandHelper.getOptions(subCommand))
+                    );
+                }
+            }
+            commandDataList.add(commandData);
+        }
+        return commandDataList;
+    }
 
 }

@@ -1,17 +1,21 @@
 package de.netbeacon.tools.jda.internal.command.utils;
 
 import de.netbeacon.tools.jda.api.command.arg.Parser;
+import de.netbeacon.tools.jda.internal.command.container.CommandArgument;
 import de.netbeacon.tools.jda.internal.command.container.CommandImp;
 import de.netbeacon.tools.jda.internal.command.container.DataMap;
 import de.netbeacon.tools.jda.internal.exception.ArgumentException;
 import de.netbeacon.tools.jda.internal.exception.ParameterException;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
 import java.lang.reflect.Member;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class CommandHelper {
 
@@ -112,4 +116,27 @@ public class CommandHelper {
         }
         return mappedArgs;
     }
+
+    public static List<OptionData> getOptions(CommandImp commandImp){
+        return commandImp.getArguments().stream()
+                .filter(CommandArgument::isExposedArgument)
+                .map(arg -> {
+                    var isOptional = arg.getAnnotation().isOptional();
+                    var clazz = arg.getAClass();
+                    if(Boolean.class.isAssignableFrom(clazz)){
+                        return new OptionData(OptionType.INTEGER, arg.getDisplayName(), arg.getAnnotation().descriptionOverride()).setRequired(isOptional);
+                    }else if(Integer.class.isAssignableFrom(clazz)) {
+                        return new OptionData(OptionType.INTEGER, arg.getDisplayName(), arg.getAnnotation().descriptionOverride()).setRequired(isOptional);
+                    }else if(User.class.isAssignableFrom(clazz) || net.dv8tion.jda.api.entities.Member.class.isAssignableFrom(clazz)) {
+                        return new OptionData(OptionType.USER, arg.getDisplayName(), arg.getAnnotation().descriptionOverride()).setRequired(isOptional);
+                    }else if(GuildChannel.class.isAssignableFrom(clazz) || MessageChannel.class.isAssignableFrom(clazz)) {
+                        return new OptionData(OptionType.CHANNEL, arg.getDisplayName(), arg.getAnnotation().descriptionOverride()).setRequired(isOptional);
+                    }else if(Role.class.isAssignableFrom(clazz)) {
+                        return new OptionData(OptionType.ROLE, arg.getDisplayName(), arg.getAnnotation().descriptionOverride()).setRequired(isOptional);
+                    }else{
+                        return new OptionData(OptionType.STRING, arg.getDisplayName(), arg.getAnnotation().descriptionOverride()).setRequired(isOptional);
+                    }
+                }).collect(Collectors.toList());
+    }
+
 }

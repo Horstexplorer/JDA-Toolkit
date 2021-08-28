@@ -26,7 +26,6 @@ public @interface Command {
     enum AccessOrigin {
         /**
          * Access from guild context only
-         * If used as slash command this will be registered guild scoped
          */
         GUILD,
 
@@ -37,7 +36,6 @@ public @interface Command {
 
         /**
          * Access from both dms and guild context
-         * If used as slash command this will be registered global scoped
          */
         GLOBAL;
     }
