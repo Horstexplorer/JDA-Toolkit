@@ -4,7 +4,8 @@ public class UnsuitableEnvironmentException extends RuntimeException{
 
     public enum Type{
         UNKNOWN,
-        NSFW
+        NSFW,
+        CONTEXT
     }
 
     private final Type type;

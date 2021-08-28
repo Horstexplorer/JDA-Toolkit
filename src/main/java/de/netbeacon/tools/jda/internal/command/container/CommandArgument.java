@@ -1,19 +1,17 @@
 package de.netbeacon.tools.jda.internal.command.container;
 
-import de.netbeacon.tools.jda.api.annotations.Argument;
-
 import java.lang.reflect.Parameter;
 
-public class ArgumentContainer {
+public class CommandArgument {
 
     private final Parameter parameter;
     private final boolean isExposedArgument;
     private final Class<?> aClass;
-    private final Argument annotation;
+    private final de.netbeacon.tools.jda.api.annotations.Argument annotation;
 
-    public ArgumentContainer(Parameter parameter){
+    public CommandArgument(Parameter parameter){
         this.parameter = parameter;
-        var annotation = parameter.getAnnotation(Argument.class);
+        var annotation = parameter.getAnnotation(de.netbeacon.tools.jda.api.annotations.Argument.class);
         this.isExposedArgument = annotation != null;
         this.aClass = parameter.getType();
         this.annotation = annotation;
@@ -35,7 +33,7 @@ public class ArgumentContainer {
         return aClass;
     }
 
-    public Argument getAnnotation() {
+    public de.netbeacon.tools.jda.api.annotations.Argument getAnnotation() {
         return annotation;
     }
 }

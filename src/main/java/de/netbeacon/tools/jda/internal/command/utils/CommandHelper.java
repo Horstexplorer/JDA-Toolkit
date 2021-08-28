@@ -1,7 +1,7 @@
 package de.netbeacon.tools.jda.internal.command.utils;
 
 import de.netbeacon.tools.jda.api.command.arg.Parser;
-import de.netbeacon.tools.jda.internal.command.container.CommandContainer;
+import de.netbeacon.tools.jda.internal.command.container.CommandImp;
 import de.netbeacon.tools.jda.internal.command.container.DataMap;
 import de.netbeacon.tools.jda.internal.exception.ArgumentException;
 import de.netbeacon.tools.jda.internal.exception.ParameterException;
@@ -9,14 +9,16 @@ import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 
 import java.lang.reflect.Member;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-public class CommandManagerHelper {
+public class CommandHelper {
 
-    private CommandManagerHelper(){}
+    private CommandHelper(){}
 
-    public static Object[] map(CommandContainer commandContainer, DataMap additionalDataMap, Map<Class<?>, Parser<?>> parsers, List<?> args){
-        var argumentContainers = commandContainer.getArguments();
+    public static Object[] map(CommandImp commandImp, DataMap additionalDataMap, Map<Class<?>, Parser<?>> parsers, List<?> args){
+        var argumentContainers = commandImp.getArguments();
         var mappedArgs = new Object[argumentContainers.size()];
         var argPos = 0;
         var parPos = new HashMap<Class<?>, Integer>();
