@@ -16,8 +16,8 @@ public class CastParser<T> implements Parser<T> {
     public T parse(byte[] data) {
         try {
             return (T) data;
-        }catch (Exception e){
-            throw new ParserException("Failed to parse data as "+type().getName(), e);
+        } catch (Exception e) {
+            throw new ParserException("Failed to parse data as " + type().getName(), e);
         }
     }
 }

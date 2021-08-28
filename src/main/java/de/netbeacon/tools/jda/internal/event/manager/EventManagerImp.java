@@ -26,8 +26,8 @@ public class EventManagerImp implements EventManager {
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private final Executor urgentExecutor = Executors.newSingleThreadExecutor();
 
-    public EventManagerImp(){
-        for(int i = 0; i < Runtime.getRuntime().availableProcessors(); i++){
+    public EventManagerImp() {
+        for (int i = 0; i < Runtime.getRuntime().availableProcessors(); i++) {
             Executor defaultExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
             defaultExecutor.execute(this::handleDefaultTask);
         }
@@ -55,7 +55,7 @@ public class EventManagerImp implements EventManager {
 
     @Override
     public void register(@NotNull Object listener) {
-        if(!(listener instanceof EventListener)){
+        if (!(listener instanceof EventListener)) {
             throw new IllegalArgumentException("Listener must implement EventListener");
         }
         listeners.add((EventListener) listener);
@@ -73,7 +73,7 @@ public class EventManagerImp implements EventManager {
 
     @Override
     public void unregister(@NotNull Object listener) {
-        if(!(listener instanceof EventListener)){
+        if (!(listener instanceof EventListener)) {
             throw new IllegalArgumentException("Listener must implement EventListener");
         }
         listeners.remove(listener);
@@ -81,61 +81,61 @@ public class EventManagerImp implements EventManager {
 
     @Override
     public void handle(@NotNull GenericEvent genericEvent) {
-        if(
+        if (
                 (genericEvent instanceof DisconnectEvent)
                         || (genericEvent instanceof ResumedEvent)
                         || (genericEvent instanceof ReconnectedEvent)
-        ){
+        ) {
             handleUrgent(genericEvent);
             return;
         }
-        if(handleSuspended.get())
+        if (handleSuspended.get())
             return;
         eventBuffer.put(genericEvent);
     }
 
-    private void handleUrgent(GenericEvent genericEvent){
-        if(genericEvent instanceof DisconnectEvent) {
+    private void handleUrgent(GenericEvent genericEvent) {
+        if (genericEvent instanceof DisconnectEvent) {
             suspendBuffer(true);
-            logger.warn("Disconnect detected! Suspending event processing from buffer. Currently "+eventBuffer.size()+" events are buffered.");
-        }else if (genericEvent instanceof ResumedEvent) {
+            logger.warn("Disconnect detected! Suspending event processing from buffer. Currently " + eventBuffer.size() + " events are buffered.");
+        } else if (genericEvent instanceof ResumedEvent) {
             suspendBuffer(false);
-            logger.warn("Resume detected! Resuming to process from buffer. Currently "+eventBuffer.size()+" events are buffered.");
-        }else if (genericEvent instanceof ReconnectedEvent) {
+            logger.warn("Resume detected! Resuming to process from buffer. Currently " + eventBuffer.size() + " events are buffered.");
+        } else if (genericEvent instanceof ReconnectedEvent) {
             var current = eventBuffer.size();
             eventBuffer.clear();
             suspendBuffer(false);
-            logger.warn("Reconnect detected! Resuming to process. "+current+"  events have been cleared from the buffer as their integrity cannot be ensured.");
+            logger.warn("Reconnect detected! Resuming to process. " + current + "  events have been cleared from the buffer as their integrity cannot be ensured.");
         }
         urgentExecutor.execute(() -> handleEvent(genericEvent));
     }
 
-    private void handleDefaultTask(){
+    private void handleDefaultTask() {
         try {
-            while(true){
+            while (true) {
                 try {
                     var event = eventBuffer.get();
-                    if(event == null) return;
+                    if (event == null) return;
                     handleEvent(event);
-                }catch (InterruptedException e){
+                } catch (InterruptedException e) {
                     throw e;
-                }catch (Exception e){
+                } catch (Exception e) {
                     logger.error("Unknown exception handling event", e);
                 }
             }
-        }catch (InterruptedException e){
+        } catch (InterruptedException e) {
             logger.warn("Received interrupt. Wont process any more events");
         }
     }
 
-    private void handleEvent(GenericEvent genericEvent){
-        for(var listener : listeners){
+    private void handleEvent(GenericEvent genericEvent) {
+        for (var listener : listeners) {
             try {
                 listener.onEvent(genericEvent);
-            }catch (Throwable t){
-                if(t instanceof Error)
+            } catch (Throwable t) {
+                if (t instanceof Error)
                     throw t;
-                logger.error("Unhandled exception on listener "+listener.getClass().getSimpleName(), t);
+                logger.error("Unhandled exception on listener " + listener.getClass().getSimpleName(), t);
             }
         }
     }

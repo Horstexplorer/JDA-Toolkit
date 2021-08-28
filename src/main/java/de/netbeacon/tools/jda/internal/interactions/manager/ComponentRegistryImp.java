@@ -26,27 +26,26 @@ public class ComponentRegistryImp extends ListenerAdapter implements EventListen
     private final ScheduledExecutorService timeoutExecutorService = Executors.newScheduledThreadPool(2);
     private final int priority;
 
-    public ComponentRegistryImp(){
+    public ComponentRegistryImp() {
         this.priority = 0;
         startTimeoutCleanup();
     }
 
-    public ComponentRegistryImp(int priority){
+    public ComponentRegistryImp(int priority) {
         this.priority = priority;
         startTimeoutCleanup();
     }
 
-    public void startTimeoutCleanup(){
+    public void startTimeoutCleanup() {
         this.timeoutExecutorService.scheduleAtFixedRate(() -> {
-            try{
+            try {
                 registry.forEach((k, v) -> {
-                    if(!v.isValid()){
+                    if (!v.isValid()) {
                         deactivate(v);
                         unregister(v);
                     }
                 });
-            }
-            catch(Exception ignored){
+            } catch (Exception ignored) {
             }
         }, 30, 30, TimeUnit.SECONDS);
     }
@@ -65,7 +64,7 @@ public class ComponentRegistryImp extends ListenerAdapter implements EventListen
     public synchronized void register(ComponentEntry<?> entry) {
         registry.put(entry.getId(), entry);
         TimeoutPolicy top = entry.getTimeoutPolicy();
-        if(!top.equals(TimeoutPolicy.NONE)){
+        if (!top.equals(TimeoutPolicy.NONE)) {
             registryTimeout.put(entry.getId(),
                     timeoutExecutorService.schedule(() -> {
                         deactivate(entry);
@@ -76,50 +75,50 @@ public class ComponentRegistryImp extends ListenerAdapter implements EventListen
         entry.setRegistry(this);
     }
 
-    public synchronized void unregister(ComponentEntry<?> entry){
+    public synchronized void unregister(ComponentEntry<?> entry) {
         String id = entry.getId();
         registry.remove(id);
         Future<?> future = registryTimeout.remove(id);
-        if(future != null){
+        if (future != null) {
             future.cancel(false);
         }
         entry.setRegistry(null);
     }
 
-    public synchronized void deactivate(ComponentEntry<?> entry){
+    public synchronized void deactivate(ComponentEntry<?> entry) {
         deactivate(entry, null);
     }
 
-    public synchronized void deactivate(ComponentEntry<?> entry_, Message message){
+    public synchronized void deactivate(ComponentEntry<?> entry_, Message message) {
         ComponentEntryImp<?> entry = (ComponentEntryImp<?>) entry_;
-        if(!entry.markDeactivated())
+        if (!entry.markDeactivated())
             return;
         var deactivationMode = entry.getDeactivationMode();
         var deactivationModeIds = deactivationMode.getIds();
-        if(message == null){
+        if (message == null) {
             // can't actually modify the other entries, can't actually know the other entries, this shouldnt normally get fired
-            for(var other : deactivationMode.entrySupplier().get()){
+            for (var other : deactivationMode.entrySupplier().get()) {
                 ((ComponentEntryImp<?>) other).markDeactivated();  // mark the others as deactivated and
                 unregister(other);                                  // remove the registration
             }
-        }else{
+        } else {
             var newRows = new ArrayList<ActionRow>();
             var currentRows = message.getActionRows();
-            for(var row : currentRows){
+            for (var row : currentRows) {
                 var newComponents = new ArrayList<Component>();
-                for(var component : row.getComponents()){
-                    if((deactivationMode.equals(DeactivationMode.SELF) && entry.getId().equals(component.getId()))
+                for (var component : row.getComponents()) {
+                    if ((deactivationMode.equals(DeactivationMode.SELF) && entry.getId().equals(component.getId()))
                             || deactivationMode.equals(DeactivationMode.ALL)
                             || deactivationModeIds.contains(component.getId())
-                    ){
-                        if(component instanceof Button){
+                    ) {
+                        if (component instanceof Button) {
                             newComponents.add(((Button) component).asDisabled());
-                        }else if(component instanceof SelectionMenu){
+                        } else if (component instanceof SelectionMenu) {
                             newComponents.add(((SelectionMenu) component).asDisabled());
                         }
-                        if(!entry.getId().equals(component.getId())){ // unregister
+                        if (!entry.getId().equals(component.getId())) { // unregister
                             ComponentEntryImp<?> oEntry = (ComponentEntryImp<?>) get(component.getId());
-                            if(oEntry != null){
+                            if (oEntry != null) {
                                 oEntry.markDeactivated();
                                 unregister(oEntry);
                             }
@@ -140,26 +139,26 @@ public class ComponentRegistryImp extends ListenerAdapter implements EventListen
     public void onGenericComponentInteractionCreate(@NotNull GenericComponentInteractionCreateEvent event) {
         var componentId = event.getComponentId();
         var component = this.get(componentId);
-        if(component == null) {
+        if (component == null) {
             return;
         }
-        if(event.getMember() == null ? !component.getAccessor().isAllowedAccessor(event.getUser()) : !component.getAccessor().isAllowedAccessor(event.getMember())){
+        if (event.getMember() == null ? !component.getAccessor().isAllowedAccessor(event.getUser()) : !component.getAccessor().isAllowedAccessor(event.getMember())) {
             return;
         }
-        if(!component.isValid() || !((ComponentEntryImp<?>) component).performActivation()){
+        if (!component.isValid() || !((ComponentEntryImp<?>) component).performActivation()) {
             return;
         }
         event.deferEdit().queue();
-        if(component.successConsumer() != null){
+        if (component.successConsumer() != null) {
             try {
                 component.successConsumer().accept(event);
-            }catch (RuntimeException e){
-                if(component.exceptionConsumer() != null){
+            } catch (RuntimeException e) {
+                if (component.exceptionConsumer() != null) {
                     component.exceptionConsumer().accept(e);
                 }
             }
         }
-        if(!component.isValid()){
+        if (!component.isValid()) {
             deactivate(component);
         }
     }

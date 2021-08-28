@@ -16,8 +16,8 @@ public class BooleanParser implements Parser<Boolean> {
     public Boolean parse(String data) {
         try {
             return Boolean.parseBoolean(data);
-        }catch (Exception e){
-            throw new ParserException("Failed to parse data as "+type().getName(), e);
+        } catch (Exception e) {
+            throw new ParserException("Failed to parse data as " + type().getName(), e);
         }
     }
 
@@ -25,8 +25,8 @@ public class BooleanParser implements Parser<Boolean> {
     public Boolean parse(byte[] data) {
         try {
             return data[0] != 0;
-        }catch (Exception e){
-            throw new ParserException("Failed to parse data as "+type().getName(), e);
+        } catch (Exception e) {
+            throw new ParserException("Failed to parse data as " + type().getName(), e);
         }
     }
 }

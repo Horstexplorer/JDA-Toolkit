@@ -9,7 +9,7 @@ public class CommandArgument {
     private final Class<?> aClass;
     private final de.netbeacon.tools.jda.api.annotations.Argument annotation;
 
-    public CommandArgument(Parameter parameter){
+    public CommandArgument(Parameter parameter) {
         this.parameter = parameter;
         var annotation = parameter.getAnnotation(de.netbeacon.tools.jda.api.annotations.Argument.class);
         this.isExposedArgument = annotation != null;
@@ -17,11 +17,11 @@ public class CommandArgument {
         this.annotation = annotation;
     }
 
-    public String getDisplayName(){
+    public String getDisplayName() {
         return annotation == null ? parameter.getName() : annotation.name();
     }
 
-    public Parameter getParameter(){
+    public Parameter getParameter() {
         return parameter;
     }
 

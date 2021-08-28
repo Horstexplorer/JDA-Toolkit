@@ -16,20 +16,19 @@ public class HumanTime {
     private final static Pattern SPACE = Pattern.compile("\\s+");
     private final LocalDateTime futureTime;
 
-    private HumanTime(LocalDateTime futureTime){
+    private HumanTime(LocalDateTime futureTime) {
         this.futureTime = futureTime;
     }
 
-    public static HumanTime parse(String string){
-        if(SIMPLE_NUM.matcher(string).matches()){
+    public static HumanTime parse(String string) {
+        if (SIMPLE_NUM.matcher(string).matches()) {
             return new HumanTime(LocalDateTime.now().plus(Long.parseLong(string), ChronoUnit.MINUTES));
-        }
-        else if(EASY_TIME_DIF.matcher(string).matches()){
+        } else if (EASY_TIME_DIF.matcher(string).matches()) {
             LocalDateTime localDateTime = LocalDateTime.now();
-            for(String var : SPACE.split(string)){
+            for (String var : SPACE.split(string)) {
                 char last = var.charAt(var.length() - 1);
                 int value = Integer.parseInt(var.substring(0, var.length() - 1));
-                switch(last){
+                switch (last) {
                     case 'y' -> localDateTime = localDateTime.plus(value, ChronoUnit.YEARS);
                     case 'M' -> localDateTime = localDateTime.plus(value, ChronoUnit.MONTHS);
                     case 'd' -> localDateTime = localDateTime.plus(value, ChronoUnit.DAYS);
@@ -39,17 +38,15 @@ public class HumanTime {
                 }
             }
             return new HumanTime(localDateTime);
-        }
-        else if(DATE_FORMAT.matcher(string).matches()){
+        } else if (DATE_FORMAT.matcher(string).matches()) {
             return new HumanTime(LocalDateTime.parse(string, DF));
-        }
-        else if(DATE_TIME_PATTERN.matcher(string).matches()){
+        } else if (DATE_TIME_PATTERN.matcher(string).matches()) {
             return new HumanTime(LocalDateTime.parse(string, DTF));
         }
         throw new RuntimeException("Failed to parse human time from string");
     }
 
-    public LocalDateTime getFutureTime(){
+    public LocalDateTime getFutureTime() {
         return futureTime;
     }
 

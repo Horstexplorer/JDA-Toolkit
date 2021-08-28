@@ -14,17 +14,18 @@ public class LanguageManagerImp implements LanguageManager {
 
     private final ConcurrentHashMap<String, LanguagePackage> packages = new ConcurrentHashMap<>();
 
-    private LanguageManagerImp(){}
+    private LanguageManagerImp() {
+    }
 
-    public static LanguageManager create(){
+    public static LanguageManager create() {
         return new LanguageManagerImp();
     }
 
-    public static LanguageManager create(JSONObject... languagePackages){
+    public static LanguageManager create(JSONObject... languagePackages) {
         return create(Arrays.stream(languagePackages).map(LanguagePackage::from).toArray(LanguagePackage[]::new));
     }
 
-    public static LanguageManager create(LanguagePackage... languagePackages){
+    public static LanguageManager create(LanguagePackage... languagePackages) {
         var lmi = new LanguageManagerImp();
         for (var lp : languagePackages)
             lmi.addPackage(lp);

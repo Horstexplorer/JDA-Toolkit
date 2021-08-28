@@ -7,12 +7,13 @@ import java.util.Map;
 
 public class MapUtil {
 
-    private MapUtil(){}
+    private MapUtil() {
+    }
 
-    public static <T> Map<T, List<Object>> merge(Map<T, List<Object>> a, Map<T, List<Object>> b){
+    public static <T> Map<T, List<Object>> merge(Map<T, List<Object>> a, Map<T, List<Object>> b) {
         var combined = new HashMap<>(a);
-        for(var key : b.keySet()){
-            if(!combined.containsKey(key)){
+        for (var key : b.keySet()) {
+            if (!combined.containsKey(key)) {
                 combined.put(key, new ArrayList<>());
             }
             combined.get(key).addAll(b.get(key));

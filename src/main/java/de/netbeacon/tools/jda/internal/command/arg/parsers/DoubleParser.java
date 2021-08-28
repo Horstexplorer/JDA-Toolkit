@@ -18,8 +18,8 @@ public class DoubleParser implements Parser<Double> {
     public Double parse(String data) {
         try {
             return Double.parseDouble(data);
-        }catch (Exception e){
-            throw new ParserException("Failed to parse data as "+type().getName(), e);
+        } catch (Exception e) {
+            throw new ParserException("Failed to parse data as " + type().getName(), e);
         }
     }
 
@@ -27,8 +27,8 @@ public class DoubleParser implements Parser<Double> {
     public Double parse(byte[] data) {
         try {
             return ByteBuffer.allocate(Double.BYTES).put(data).flip().getDouble();
-        }catch (Exception e){
-            throw new ParserException("Failed to parse data as "+type().getName(), e);
+        } catch (Exception e) {
+            throw new ParserException("Failed to parse data as " + type().getName(), e);
         }
     }
 }

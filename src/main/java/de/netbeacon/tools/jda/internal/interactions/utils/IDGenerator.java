@@ -4,9 +4,10 @@ import org.apache.commons.lang3.RandomStringUtils;
 
 public class IDGenerator {
 
-    private IDGenerator(){}
+    private IDGenerator() {
+    }
 
-    public static synchronized String printableString(int length){
+    public static synchronized String printableString(int length) {
         return RandomStringUtils.randomPrint(length);
     }
 

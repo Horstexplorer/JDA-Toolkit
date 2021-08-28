@@ -18,8 +18,8 @@ public class IntegerParser implements Parser<Integer> {
     public Integer parse(String data) {
         try {
             return Integer.parseInt(data);
-        }catch (Exception e){
-            throw new ParserException("Failed to parse data as "+type().getName(), e);
+        } catch (Exception e) {
+            throw new ParserException("Failed to parse data as " + type().getName(), e);
         }
     }
 
@@ -27,8 +27,8 @@ public class IntegerParser implements Parser<Integer> {
     public Integer parse(byte[] data) {
         try {
             return ByteBuffer.allocate(Integer.BYTES).put(data).flip().getInt();
-        }catch (Exception e){
-            throw new ParserException("Failed to parse data as "+type().getName(), e);
+        } catch (Exception e) {
+            throw new ParserException("Failed to parse data as " + type().getName(), e);
         }
     }
 }

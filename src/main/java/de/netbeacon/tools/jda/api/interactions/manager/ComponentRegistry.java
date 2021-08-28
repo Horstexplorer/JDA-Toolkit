@@ -11,7 +11,7 @@ public interface ComponentRegistry {
     /**
      * Returns an ComponentEntry by its id
      *
-     * @param id of the component
+     * @param id  of the component
      * @param <T> of the represented jda interaction component
      * @return ComponentEntry or null if none has been found
      */

@@ -15,7 +15,7 @@ public class LanguagePackageImp implements LanguagePackage {
     private final boolean isDefault;
     private final ConcurrentHashMap<String, String> translations = new ConcurrentHashMap<>();
 
-    public LanguagePackageImp(JSONObject jsonObject){
+    public LanguagePackageImp(JSONObject jsonObject) {
         id = jsonObject.getString("languageId").toLowerCase();
         name = jsonObject.getString("languageName");
         description = jsonObject.getString("languageDescription");
@@ -48,11 +48,11 @@ public class LanguagePackageImp implements LanguagePackage {
     @Override
     public String getTranslation(String key, String... placeholderInserts) {
         String translation = translations.get(key);
-        if(translation == null){
+        if (translation == null) {
             return "Missing translation for: " + key;
         }
         int i = 0;
-        for(Object o : placeholderInserts){
+        for (Object o : placeholderInserts) {
             String placeholder = "%" + i + "%";
             translation = translation.replace(placeholder, o.toString());
             i++;
@@ -60,14 +60,13 @@ public class LanguagePackageImp implements LanguagePackage {
         return translation;
     }
 
-    private Map<String, String> toSimpleAccessors(String prefix, Object o){
+    private Map<String, String> toSimpleAccessors(String prefix, Object o) {
         Map<String, String> map = new HashMap<>();
-        if(o instanceof JSONObject){
-            for(String key : ((JSONObject) o).keySet()){
+        if (o instanceof JSONObject) {
+            for (String key : ((JSONObject) o).keySet()) {
                 map.putAll(toSimpleAccessors((prefix == null ? "" : prefix + ".") + key, ((JSONObject) o).get(key)));
             }
-        }
-        else{
+        } else {
             map.put(prefix, o.toString());
         }
         return map;

@@ -22,17 +22,17 @@ public class EventWaiterImp implements EventWaiter, EventListener, EventListener
     private final ExecutorService asyncExecutorService;
     private final int priority;
 
-    public EventWaiterImp(){
+    public EventWaiterImp() {
         this.asyncExecutorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         this.priority = 0;
     }
 
-    public EventWaiterImp(ExecutorService asyncExecutorService){
+    public EventWaiterImp(ExecutorService asyncExecutorService) {
         this.asyncExecutorService = asyncExecutorService;
         this.priority = 0;
     }
 
-    public EventWaiterImp(ExecutorService asyncExecutorService, int priority){
+    public EventWaiterImp(ExecutorService asyncExecutorService, int priority) {
         this.asyncExecutorService = asyncExecutorService;
         this.priority = priority;
     }
@@ -43,14 +43,14 @@ public class EventWaiterImp implements EventWaiter, EventListener, EventListener
             EventProfile<T> desc = new EventProfile<T>(eventClassToWait, condition);
             try {
                 eventDescriptionList.add(desc);
-                synchronized (desc){
+                synchronized (desc) {
                     desc.wait(timeout);
                 }
-                if(desc.getEvent() == null){
+                if (desc.getEvent() == null) {
                     throw new TimeoutException("Waiting for event timed out after " + timeout + " ms");
                 }
                 return desc.getEvent();
-            }catch (Exception e){
+            } catch (Exception e) {
                 eventDescriptionList.remove(desc);
                 throw new ExecutionException(e);
             }
@@ -65,7 +65,7 @@ public class EventWaiterImp implements EventWaiter, EventListener, EventListener
 
     @Override
     public void onEvent(@NotNull GenericEvent event) {
-        for(var entry : eventDescriptionList){
+        for (var entry : eventDescriptionList) {
             entry.tryFinish(event);
         }
     }

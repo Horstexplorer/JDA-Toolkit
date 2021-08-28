@@ -11,6 +11,7 @@ import java.util.function.Consumer;
 
 /**
  * Represents a component entry
+ *
  * @param <T> represented ComponentInteraction
  */
 public interface ComponentEntry<T extends ComponentInteraction> {
@@ -58,20 +59,21 @@ public interface ComponentEntry<T extends ComponentInteraction> {
     TimeoutPolicy getTimeoutPolicy();
 
     /**
-     * Sets the registry for this component
-     *
-     * This should not be set manually
-     * @param registry which takes care of this record
-     * @return instance of this component for chaining
-     */
-    ComponentEntry<T> setRegistry(ComponentRegistry registry);
-
-    /**
      * Returns the registry this component is assigned to
      *
      * @return ComponentRegistry
      */
     ComponentRegistry getRegistry();
+
+    /**
+     * Sets the registry for this component
+     * <p>
+     * This should not be set manually
+     *
+     * @param registry which takes care of this record
+     * @return instance of this component for chaining
+     */
+    ComponentEntry<T> setRegistry(ComponentRegistry registry);
 
     /**
      * Whether this component is still valid to keep

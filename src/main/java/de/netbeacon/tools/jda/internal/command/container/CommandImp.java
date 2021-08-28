@@ -32,19 +32,7 @@ public class CommandImp {
     private final Command annotation;
     private final List<CommandArgument> commandArguments;
 
-    public static CommandImp asSpacer(String name){
-        return asSpacer(null, name);
-    }
-
-    public static CommandImp asSpacer(CommandImp parent, String name){
-        return asExecutable(parent, name, null, null, null);
-    }
-
-    public static CommandImp asExecutable(CommandImp parent, String name, Object instance, Method method, Command annotation){
-        return new CommandImp(parent, name, instance, method, annotation);
-    }
-
-    private CommandImp(CommandImp parent, String name, Object instance, Method method, Command annotation){
+    private CommandImp(CommandImp parent, String name, Object instance, Method method, Command annotation) {
         this.parent = parent;
         this.name = name;
         this.instance = instance;
@@ -54,21 +42,33 @@ public class CommandImp {
         this.isExecutable = (instance != null && method != null && annotation != null);
     }
 
+    public static CommandImp asSpacer(String name) {
+        return asSpacer(null, name);
+    }
+
+    public static CommandImp asSpacer(CommandImp parent, String name) {
+        return asExecutable(parent, name, null, null, null);
+    }
+
+    public static CommandImp asExecutable(CommandImp parent, String name, Object instance, Method method, Command annotation) {
+        return new CommandImp(parent, name, instance, method, annotation);
+    }
+
     public String getName() {
         return name;
     }
 
-    public CommandImp getParent(){
+    public CommandImp getParent() {
         return parent;
     }
 
-    public void addSubCommand(CommandImp... commandImps){
-        for(var path : commandImps){
+    public void addSubCommand(CommandImp... commandImps) {
+        for (var path : commandImps) {
             subCommands.put(path.getName(), path);
         }
     }
 
-    public CommandImp getSubCommand(String name){
+    public CommandImp getSubCommand(String name) {
         return subCommands.get(name);
     }
 
@@ -96,24 +96,24 @@ public class CommandImp {
         return commandArguments;
     }
 
-    public void doExecute(CommandManager commandManager, List<String> args, GenericEvent genericEvent){
-        if(isExecutable){
-            if(!args.isEmpty()){
+    public void doExecute(CommandManager commandManager, List<String> args, GenericEvent genericEvent) {
+        if (isExecutable) {
+            if (!args.isEmpty()) {
                 var nextCommand = getSubCommand(args.get(0));
-                if(nextCommand != null){
+                if (nextCommand != null) {
                     args.remove(0);
                     nextCommand.doExecute(commandManager, args, genericEvent);
                     return;
                 }
             }
-            if(genericEvent instanceof MessageReceivedEvent messageReceivedEvent){
+            if (genericEvent instanceof MessageReceivedEvent messageReceivedEvent) {
                 doExecute(commandManager, args, messageReceivedEvent);
-            }else if(genericEvent instanceof SlashCommandEvent slashCommandEvent){
+            } else if (genericEvent instanceof SlashCommandEvent slashCommandEvent) {
                 doExecute(commandManager, slashCommandEvent);
             }
-        }else if(!args.isEmpty()){
+        } else if (!args.isEmpty()) {
             var nextCommand = getSubCommand(args.get(0));
-            if(nextCommand == null){
+            if (nextCommand == null) {
                 return;
             }
             args.remove(0);
@@ -121,31 +121,31 @@ public class CommandImp {
         }
     }
 
-    public void doExecute(CommandManager commandManager, List<String> args, MessageReceivedEvent event){
+    public void doExecute(CommandManager commandManager, List<String> args, MessageReceivedEvent event) {
         try {
             // language
             var languagePack = commandManager.getLanguagePackageProvider().apply(event);
             // check location
-            if(annotation.origin().equals(Command.AccessOrigin.DM) && event.isFromGuild()
-                    || annotation.origin().equals(Command.AccessOrigin.GUILD) && !event.isFromGuild()){
+            if (annotation.origin().equals(Command.AccessOrigin.DM) && event.isFromGuild()
+                    || annotation.origin().equals(Command.AccessOrigin.GUILD) && !event.isFromGuild()) {
                 throw new UnsuitableEnvironmentException(UnsuitableEnvironmentException.Type.CONTEXT,
                         "Tried to access command from wrong context location");
             }
-            if(event.isFromGuild() && !event.getTextChannel().isNSFW() && annotation.isNSFW()){
+            if (event.isFromGuild() && !event.getTextChannel().isNSFW() && annotation.isNSFW()) {
                 throw new UnsuitableEnvironmentException(UnsuitableEnvironmentException.Type.NSFW,
                         "Tried to access an NSFW command in a non NSFW channel");
             }
             // check permissions
-            if(event.isFromGuild() && !event.getGuild().getSelfMember().hasPermission(event.getTextChannel(), annotation.botPermission())){
-                throw new PermissionException(PermissionException.Type.BOT, "Bot is missing necessary permissions", new HashMap<>(){{
-                    for(var perm : annotation.botPermission()){
+            if (event.isFromGuild() && !event.getGuild().getSelfMember().hasPermission(event.getTextChannel(), annotation.botPermission())) {
+                throw new PermissionException(PermissionException.Type.BOT, "Bot is missing necessary permissions", new HashMap<>() {{
+                    for (var perm : annotation.botPermission()) {
                         put(perm, event.getGuild().getSelfMember().hasPermission(event.getTextChannel(), perm));
                     }
                 }});
             }
-            if(event.isFromGuild() && !event.getMember().hasPermission(event.getTextChannel(), annotation.userPermission())){
-                throw new PermissionException(PermissionException.Type.USER, "User is missing necessary permissions", new HashMap<>(){{
-                    for(var perm : annotation.botPermission()){
+            if (event.isFromGuild() && !event.getMember().hasPermission(event.getTextChannel(), annotation.userPermission())) {
+                throw new PermissionException(PermissionException.Type.USER, "User is missing necessary permissions", new HashMap<>() {{
+                    for (var perm : annotation.botPermission()) {
                         put(perm, event.getMember().hasPermission(event.getTextChannel(), perm));
                     }
                 }});
@@ -164,53 +164,53 @@ public class CommandImp {
                     .add("args", args);
             Supplier<DataMap> externalDataTask = () -> {
                 DataMap extDataMap = new DataMap();
-                for(var supplier : commandManager.getExternalDataSupplier())
+                for (var supplier : commandManager.getExternalDataSupplier())
                     extDataMap = DataMap.combine(extDataMap, supplier.apply(event));
                 return internalDataMap;
             };
-            new SupplierExecutionAction<>(commandManager.getExecutor(), externalDataTask).queue(externalMap ->{
+            new SupplierExecutionAction<>(commandManager.getExecutor(), externalDataTask).queue(externalMap -> {
                 var completeDataMap = DataMap.combine(internalDataMap, externalMap);
                 try {
                     method.invoke(internalDataMap, CommandHelper.map(this, completeDataMap, commandManager.getParsers(), args));
-                } catch (ParameterException e){
+                } catch (ParameterException e) {
                     // bad params
-                } catch (ArgumentException e){
+                } catch (ArgumentException e) {
                     // bad args
-                }catch (Exception e) {
+                } catch (Exception e) {
                     // unhandled
                 }
             }, exception -> {
                 // external data
             });
-        }catch (UnsuitableEnvironmentException e){
+        } catch (UnsuitableEnvironmentException e) {
             // bad environment
-        }catch (PermissionException e){
+        } catch (PermissionException e) {
             // bad permission for bot or user
-        }catch (Exception e){
+        } catch (Exception e) {
             // unhandled
         }
     }
 
-    public void doExecute(CommandManager commandManager, SlashCommandEvent event){
+    public void doExecute(CommandManager commandManager, SlashCommandEvent event) {
         try {
             // language
             var languagePack = commandManager.getLanguagePackageProvider().apply(event);
             // check location
-            if(event.isFromGuild() && !event.getTextChannel().isNSFW() && annotation.isNSFW()){
+            if (event.isFromGuild() && !event.getTextChannel().isNSFW() && annotation.isNSFW()) {
                 throw new UnsuitableEnvironmentException(UnsuitableEnvironmentException.Type.NSFW,
                         "Tried to access an NSFW command in a non NSFW channel");
             }
             // check permissions
-            if(event.isFromGuild() && event.getGuild().getSelfMember().hasPermission(event.getTextChannel(), annotation.botPermission())){
-                throw new PermissionException(PermissionException.Type.BOT, "Bot is missing necessary permissions", new HashMap<>(){{
-                    for(var perm : annotation.botPermission()){
+            if (event.isFromGuild() && event.getGuild().getSelfMember().hasPermission(event.getTextChannel(), annotation.botPermission())) {
+                throw new PermissionException(PermissionException.Type.BOT, "Bot is missing necessary permissions", new HashMap<>() {{
+                    for (var perm : annotation.botPermission()) {
                         put(perm, event.getGuild().getSelfMember().hasPermission(event.getTextChannel(), perm));
                     }
                 }});
             }
-            if(event.isFromGuild() && event.getMember().hasPermission(event.getTextChannel(), annotation.userPermission())){
-                throw new PermissionException(PermissionException.Type.USER, "User is missing necessary permissions", new HashMap<>(){{
-                    for(var perm : annotation.botPermission()){
+            if (event.isFromGuild() && event.getMember().hasPermission(event.getTextChannel(), annotation.userPermission())) {
+                throw new PermissionException(PermissionException.Type.USER, "User is missing necessary permissions", new HashMap<>() {{
+                    for (var perm : annotation.botPermission()) {
                         put(perm, event.getMember().hasPermission(event.getTextChannel(), perm));
                     }
                 }});
@@ -231,29 +231,29 @@ public class CommandImp {
                     .add("interaction", event.getInteraction());
             Supplier<DataMap> externalDataTask = () -> {
                 DataMap extDataMap = new DataMap();
-                for(var supplier : commandManager.getExternalDataSupplier())
+                for (var supplier : commandManager.getExternalDataSupplier())
                     extDataMap = DataMap.combine(extDataMap, supplier.apply(event));
                 return internalDataMap;
             };
-            new SupplierExecutionAction<>(commandManager.getExecutor(), externalDataTask).queue(externalMap ->{
+            new SupplierExecutionAction<>(commandManager.getExecutor(), externalDataTask).queue(externalMap -> {
                 var completeDataMap = DataMap.combine(internalDataMap, externalMap);
                 try {
-                   method.invoke(internalDataMap, CommandHelper.map(this, completeDataMap, commandManager.getParsers(), event.getOptions()));
-                } catch (ParameterException e){
+                    method.invoke(internalDataMap, CommandHelper.map(this, completeDataMap, commandManager.getParsers(), event.getOptions()));
+                } catch (ParameterException e) {
                     // bad params
-                } catch (ArgumentException e){
+                } catch (ArgumentException e) {
                     // bad args
-                }catch (Exception e) {
+                } catch (Exception e) {
                     // unhandled
                 }
             }, exception -> {
                 // external data
             });
-        }catch (UnsuitableEnvironmentException e){
+        } catch (UnsuitableEnvironmentException e) {
             // bad environment
-        }catch (PermissionException e){
+        } catch (PermissionException e) {
             // bad permission for bot or user
-        }catch (Exception e){
+        } catch (Exception e) {
             // unhandled
         }
     }

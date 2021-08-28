@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 
 /**
  * Marks a method as command
- *
+ * <p>
  * path: contains the arguments present to access this command
  * alias: an array of possible paths used as alias for this command
  * descriptionOverride: description which should be used as fallback for when no language manager has been set up
@@ -22,6 +22,66 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface Command {
+
+    /**
+     * Contains the arguments present to access this command
+     *
+     * @return Path
+     */
+    String path();
+
+    /**
+     * An array of possible paths used as alias for this command
+     *
+     * @return Alias[]
+     */
+    String[] alias();
+
+    /**
+     * Description which should be used as fallback for when no language manager has been set up
+     *
+     * @return descriptionOverride
+     */
+    String descriptionOverride() default "";
+
+    /**
+     * Permissions the bot needs to have
+     * <p>
+     * default is Permission.MESSAGE_READ, Permission.MESSAGE_WRITE, Permission.MESSAGE_EMBED_LINKS
+     *
+     * @return Permission[]
+     */
+    Permission[] botPermission() default {Permission.MESSAGE_READ, Permission.MESSAGE_WRITE, Permission.MESSAGE_EMBED_LINKS};
+
+    /**
+     * Permissions the user needs to have
+     *
+     * @return Permission[]
+     */
+    Permission[] userPermission() default {};
+
+    /**
+     * What type of command this should represent
+     *
+     * @return Type
+     */
+    Type type() default Type.CHAT;
+
+    /**
+     * From which context this command might be accessible
+     *
+     * @return AccessOrigin
+     */
+    AccessOrigin origin() default AccessOrigin.GLOBAL;
+
+    /**
+     * Whether this command returns nsfw content
+     * <p>
+     * default is false
+     *
+     * @return boolean
+     */
+    boolean isNSFW() default false;
 
     enum AccessOrigin {
         /**
@@ -57,62 +117,4 @@ public @interface Command {
          */
         CHAT_AND_SLASH;
     }
-
-    /**
-     * Contains the arguments present to access this command
-     *
-     * @return Path
-     */
-    String path();
-
-    /**
-     * An array of possible paths used as alias for this command
-     *
-     * @return Alias[]
-     */
-    String[] alias();
-
-    /**
-     * Description which should be used as fallback for when no language manager has been set up
-     *
-     * @return descriptionOverride
-     */
-    String descriptionOverride() default "";
-
-    /**
-     * Permissions the bot needs to have
-     *
-     * default is Permission.MESSAGE_READ, Permission.MESSAGE_WRITE, Permission.MESSAGE_EMBED_LINKS
-     * @return Permission[]
-     */
-    Permission[] botPermission() default {Permission.MESSAGE_READ, Permission.MESSAGE_WRITE, Permission.MESSAGE_EMBED_LINKS};
-
-    /**
-     * Permissions the user needs to have
-     *
-     * @return Permission[]
-     */
-    Permission[] userPermission() default {};
-
-    /**
-     * What type of command this should represent
-     *
-     * @return Type
-     */
-    Type type() default Type.CHAT;
-
-    /**
-     * From which context this command might be accessible
-     *
-     * @return AccessOrigin
-     */
-    AccessOrigin origin() default AccessOrigin.GLOBAL;
-
-    /**
-     * Whether this command returns nsfw content
-     *
-     * default is false
-     * @return boolean
-     */
-    boolean isNSFW() default false;
 }

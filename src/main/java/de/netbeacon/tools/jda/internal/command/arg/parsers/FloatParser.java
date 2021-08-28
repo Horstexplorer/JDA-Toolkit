@@ -18,8 +18,8 @@ public class FloatParser implements Parser<Float> {
     public Float parse(String data) {
         try {
             return Float.parseFloat(data);
-        }catch (Exception e){
-            throw new ParserException("Failed to parse data as "+type().getName(), e);
+        } catch (Exception e) {
+            throw new ParserException("Failed to parse data as " + type().getName(), e);
         }
     }
 
@@ -27,8 +27,8 @@ public class FloatParser implements Parser<Float> {
     public Float parse(byte[] data) {
         try {
             return ByteBuffer.allocate(Float.BYTES).put(data).flip().getFloat();
-        }catch (Exception e){
-            throw new ParserException("Failed to parse data as "+type().getName(), e);
+        } catch (Exception e) {
+            throw new ParserException("Failed to parse data as " + type().getName(), e);
         }
     }
 }

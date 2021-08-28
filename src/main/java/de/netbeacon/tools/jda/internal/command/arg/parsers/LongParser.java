@@ -18,8 +18,8 @@ public class LongParser implements Parser<Long> {
     public Long parse(String data) {
         try {
             return Long.parseLong(data);
-        }catch (Exception e){
-            throw new ParserException("Failed to parse data as "+type().getName(), e);
+        } catch (Exception e) {
+            throw new ParserException("Failed to parse data as " + type().getName(), e);
         }
     }
 
@@ -27,8 +27,8 @@ public class LongParser implements Parser<Long> {
     public Long parse(byte[] data) {
         try {
             return ByteBuffer.allocate(Long.BYTES).put(data).flip().getLong();
-        }catch (Exception e){
-            throw new ParserException("Failed to parse data as "+type().getName(), e);
+        } catch (Exception e) {
+            throw new ParserException("Failed to parse data as " + type().getName(), e);
         }
     }
 }

@@ -18,8 +18,8 @@ public class LocalDateTimeParser implements Parser<LocalDateTime> {
     public LocalDateTime parse(byte[] data) {
         try {
             return LocalDateTime.parse(new String(data), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        }catch (Exception e){
-            throw new ParserException("Failed to parse data as "+type().getName(), e);
+        } catch (Exception e) {
+            throw new ParserException("Failed to parse data as " + type().getName(), e);
         }
     }
 }

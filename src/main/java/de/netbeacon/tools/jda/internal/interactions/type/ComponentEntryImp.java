@@ -22,12 +22,12 @@ public class ComponentEntryImp<T extends ComponentInteraction> implements Compon
     private final TimeoutPolicy timeoutPolicy;
     private final AtomicInteger remainingActivations = new AtomicInteger(0);
     private final AtomicBoolean deactivated = new AtomicBoolean(false);
-    private ComponentRegistry registry;
     private final Consumer<T> successConsumer;
     private final Consumer<Exception> exceptionConsumer;
+    private ComponentRegistry registry;
 
 
-    public ComponentEntryImp(Accessors accessors, Activations activations, DeactivationMode deactivationMode, TimeoutPolicy timeoutPolicy, Consumer<T> successConsumer, Consumer<Exception> exceptionConsumer){
+    public ComponentEntryImp(Accessors accessors, Activations activations, DeactivationMode deactivationMode, TimeoutPolicy timeoutPolicy, Consumer<T> successConsumer, Consumer<Exception> exceptionConsumer) {
         this.accessors = accessors;
         this.activations = activations;
         this.deactivationMode = deactivationMode;
@@ -95,16 +95,16 @@ public class ComponentEntryImp<T extends ComponentInteraction> implements Compon
         return exceptionConsumer;
     }
 
-    public synchronized boolean performActivation(){
-        if(activations.equals(Activations.UNLIMITED))
+    public synchronized boolean performActivation() {
+        if (activations.equals(Activations.UNLIMITED))
             return true;
-        if(remainingActivations.get() <= 0)
+        if (remainingActivations.get() <= 0)
             return false;
         remainingActivations.decrementAndGet();
         return true;
     }
 
-    public synchronized boolean markDeactivated(){
+    public synchronized boolean markDeactivated() {
         return deactivated.compareAndSet(false, true);
     }
 }

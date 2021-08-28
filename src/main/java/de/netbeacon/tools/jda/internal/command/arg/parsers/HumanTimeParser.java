@@ -16,8 +16,8 @@ public class HumanTimeParser implements Parser<HumanTime> {
     public HumanTime parse(byte[] data) {
         try {
             return HumanTime.parse(new String(data));
-        }catch (Exception e){
-            throw new ParserException("Failed to parse data as "+type().getName(), e);
+        } catch (Exception e) {
+            throw new ParserException("Failed to parse data as " + type().getName(), e);
         }
     }
 }

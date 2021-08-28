@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * Marks a method parameter as command argument, exposing it to the user input
- *
+ * <p>
  * name: the name of the argument
  * descriptionOverride: description which should be used as fallback for when no language manager has been set up
  * isOptional: whether this argument is optional
@@ -32,8 +32,9 @@ public @interface Argument {
 
     /**
      * Whether this argument is optional
-     *
+     * <p>
      * default is false
+     *
      * @return boolean
      */
     boolean isOptional() default false;

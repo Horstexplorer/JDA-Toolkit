@@ -4,17 +4,11 @@ import net.dv8tion.jda.api.Permission;
 
 import java.util.Map;
 
-public class PermissionException extends RuntimeException{
-
-    public enum Type {
-        BOT,
-        USER;
-    }
+public class PermissionException extends RuntimeException {
 
     private final Type type;
     private final Map<Permission, Boolean> permissionCheck;
-
-    public PermissionException(Type type, String message, Map<Permission, Boolean> permissionCheck){
+    public PermissionException(Type type, String message, Map<Permission, Boolean> permissionCheck) {
         super(message);
         this.type = type;
         this.permissionCheck = permissionCheck;
@@ -26,5 +20,10 @@ public class PermissionException extends RuntimeException{
 
     public Map<Permission, Boolean> getPermissionCheck() {
         return permissionCheck;
+    }
+
+    public enum Type {
+        BOT,
+        USER;
     }
 }

@@ -17,8 +17,8 @@ public class MentionParser implements Parser<Mention> {
     public Mention parse(String data) throws ParserException {
         try {
             return Mention.parse(data);
-        }catch (Exception e){
-            throw new ParserException("Failed to parse data as "+type().getName(), e);
+        } catch (Exception e) {
+            throw new ParserException("Failed to parse data as " + type().getName(), e);
         }
     }
 
@@ -26,8 +26,8 @@ public class MentionParser implements Parser<Mention> {
     public Mention parse(byte[] data) throws ParserException {
         try {
             return Mention.parse(new String(data));
-        }catch (Exception e){
-            throw new ParserException("Failed to parse data as "+type().getName(), e);
+        } catch (Exception e) {
+            throw new ParserException("Failed to parse data as " + type().getName(), e);
         }
     }
 }

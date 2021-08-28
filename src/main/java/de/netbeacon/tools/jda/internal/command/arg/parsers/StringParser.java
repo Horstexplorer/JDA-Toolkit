@@ -19,8 +19,8 @@ public class StringParser implements Parser<String> {
     public String parse(byte[] data) throws ParserException {
         try {
             return new String(data);
-        }catch (Exception e){
-            throw new ParserException("Failed to parse data as "+type().getName(), e);
+        } catch (Exception e) {
+            throw new ParserException("Failed to parse data as " + type().getName(), e);
         }
     }
 }
